@@ -25,16 +25,25 @@ jobs:
       - name: Setup Visual Studio Clang environment
         uses: ilammy/msvc-dev-cmd@v1
 
+      - name: Enable sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
       - name: Configure CMake (Non-AVX2 / x86-64-v2)
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           cmake --fresh -G Ninja -B build `
             -DCMAKE_BUILD_TYPE=Release `
             -DENABLE_AVX2=OFF `
             -DCMAKE_C_COMPILER=clang-cl `
             -DCMAKE_CXX_COMPILER=clang-cl `
+            -DCMAKE_C_COMPILER_LAUNCHER=sccache `
+            -DCMAKE_CXX_COMPILER_LAUNCHER=sccache `
             -DCMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE=OFF
 
       - name: Build shadPS4
+        env:
+          SCCACHE_GHA_ENABLED: "true"
         run: |
           cmake --build build --config Release --target shadps4 --parallel
 

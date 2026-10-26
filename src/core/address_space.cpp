@@ -201,9 +201,17 @@ struct AddressSpace::Impl {
                                             PAGE_EXECUTE_READWRITE, SEC_COMMIT, BackingSize,
                                             nullptr, nullptr, 0);
         if (!backing_handle) {
-            backing_handle = CreateFileMapping2(INVALID_HANDLE_VALUE, nullptr, FILE_MAP_ALL_ACCESS,
-                                                PAGE_EXECUTE_READWRITE, SEC_RESERVE, BackingSize,
-                                                nullptr, nullptr, 0);
+            wchar_t tmp_path[MAX_PATH];
+            GetTempPathW(MAX_PATH, tmp_path);
+            std::wstring swap_file = std::wstring(tmp_path) + L"shadps4_8gb_backing.bin";
+            HANDLE hFile = CreateFileW(swap_file.c_str(), GENERIC_READ | GENERIC_WRITE | GENERIC_EXECUTE,
+                                       FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, nullptr,
+                                       CREATE_ALWAYS, FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE, nullptr);
+            if (hFile != INVALID_HANDLE_VALUE) {
+                backing_handle = CreateFileMapping2(hFile, nullptr, FILE_MAP_ALL_ACCESS,
+                                                    PAGE_EXECUTE_READWRITE, SEC_COMMIT, BackingSize,
+                                                    nullptr, nullptr, 0);
+            }
         }
 
         ASSERT_MSG(backing_handle, "{}", Common::GetLastErrorMsg());

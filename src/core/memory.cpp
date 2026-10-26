@@ -29,7 +29,7 @@ MemoryManager::MemoryManager() {
     }
 
     // Pre-initialize direct backing
-    auto total_size = ORBIS_KERNEL_TOTAL_MEM_DEV_PRO;
+    auto total_size = ORBIS_KERNEL_TOTAL_MEM;
     s32 extra_dmem = EmulatorSettings.GetExtraDmemInMBytes();
     if (extra_dmem != 0) {
         total_size += extra_dmem * 1_MB;
