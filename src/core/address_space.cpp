@@ -61,7 +61,7 @@ static constexpr u64 SystemReservedSize = SYSTEM_RESERVED_MAX - SYSTEM_RESERVED_
 static constexpr u64 UserSize = USER_MAX - USER_MIN + 1;
 
 // Required backing file size for mapping physical address space.
-static u64 BackingSize = ORBIS_KERNEL_TOTAL_MEM_DEV_PRO + ORBIS_KERNEL_FLEXIBLE_MEMORY_SIZE;
+static u64 BackingSize = ORBIS_KERNEL_TOTAL_MEM + ORBIS_KERNEL_FLEXIBLE_MEMORY_SIZE;
 
 #ifdef _WIN32
 
@@ -200,6 +200,11 @@ struct AddressSpace::Impl {
         backing_handle = CreateFileMapping2(INVALID_HANDLE_VALUE, nullptr, FILE_MAP_ALL_ACCESS,
                                             PAGE_EXECUTE_READWRITE, SEC_COMMIT, BackingSize,
                                             nullptr, nullptr, 0);
+        if (!backing_handle) {
+            backing_handle = CreateFileMapping2(INVALID_HANDLE_VALUE, nullptr, FILE_MAP_ALL_ACCESS,
+                                                PAGE_EXECUTE_READWRITE, SEC_RESERVE, BackingSize,
+                                                nullptr, nullptr, 0);
+        }
 
         ASSERT_MSG(backing_handle, "{}", Common::GetLastErrorMsg());
         // Allocate a virtual memory for the backing file map as placeholder
