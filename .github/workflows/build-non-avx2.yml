@@ -1,0 +1,45 @@
+name: Build shadPS4 Windows x86-64-v2 (Non-AVX2)
+
+on:
+  push:
+    branches:
+      - feat/x86-64-v2-fallback
+      - main
+    paths:
+      - 'src/**'
+      - 'CMakeLists.txt'
+      - '.github/workflows/build-non-avx2.yml'
+  workflow_dispatch:
+
+jobs:
+  windows-sdl-v2:
+    name: Windows x86-64-v2 (Non-AVX2)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Visual Studio Clang environment
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure CMake (Non-AVX2 / x86-64-v2)
+        run: |
+          cmake --fresh -G Ninja -B build `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DENABLE_AVX2=OFF `
+            -DCMAKE_C_COMPILER=clang-cl `
+            -DCMAKE_CXX_COMPILER=clang-cl `
+            -DCMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE=OFF
+
+      - name: Build shadPS4
+        run: |
+          cmake --build build --config Release --target shadPS4 --parallel
+
+      - name: Upload Windows x86-64-v2 Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shadps4-win64-sdl-non-avx2
+          path: build/shadPS4.exe
