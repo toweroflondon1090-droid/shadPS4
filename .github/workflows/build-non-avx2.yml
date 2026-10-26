@@ -36,10 +36,10 @@ jobs:
 
       - name: Build shadPS4
         run: |
-          cmake --build build --config Release --target shadPS4 --parallel
+          cmake --build build --config Release --target shadps4 --parallel
 
       - name: Upload Windows x86-64-v2 Artifact
         uses: actions/upload-artifact@v4
         with:
           name: shadps4-win64-sdl-non-avx2
-          path: build/shadPS4.exe
+          path: build/shad*.exe
