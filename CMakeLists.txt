@@ -60,9 +60,16 @@ else()
 endif()
 
 if (ARCHITECTURE STREQUAL "x86_64")
-    # Target x86-64-v3 CPU architecture as this is a good balance between supporting performance critical
-    # instructions like AVX2 and maintaining support for older CPUs.
-    add_compile_options(-march=x86-64-v3)
+    option(ENABLE_AVX2 "Enable AVX2 instructions (target x86-64-v3)" ON)
+    if (ENABLE_AVX2)
+        # Target x86-64-v3 CPU architecture as this is a good balance between supporting performance critical
+        # instructions like AVX2 and maintaining support for older CPUs.
+        add_compile_options(-march=x86-64-v3)
+    else()
+        # Fallback to x86-64-v2 (SSE4.2/POPCNT) for non-AVX2 CPUs (AMD Jaguar / PS4 Linux, legacy Intel)
+        add_compile_options(-march=x86-64-v2)
+        message(STATUS "shadPS4: Configured for x86-64-v2 (Non-AVX2 / Jaguar target)")
+    endif()
 endif()
 
 cmake_host_system_information(RESULT PROC_INFO QUERY PROCESSOR_DESCRIPTION)
